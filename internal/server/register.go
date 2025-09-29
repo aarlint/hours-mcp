@@ -183,16 +183,16 @@ func RegisterTools(server *mcp.Server, db *sql.DB) {
 
 	// Add Contract tool
 	type addContractArgs struct {
-		ClientName     string   `json:"client_name" jsonschema:"Client name"`
-		ContractNumber string   `json:"contract_number" jsonschema:"Contract number (unique identifier)"`
-		Name           string   `json:"name" jsonschema:"Contract name/description"`
-		HourlyRate     float64  `json:"hourly_rate" jsonschema:"Hourly rate for this contract"`
-		Currency       string   `json:"currency,omitempty" jsonschema:"Currency code (e.g. USD, EUR)"`
-		ContractType   string   `json:"contract_type,omitempty" jsonschema:"Contract type (hourly, fixed, retainer)"`
-		StartDate      string   `json:"start_date" jsonschema:"Contract start date (YYYY-MM-DD)"`
-		EndDate        string   `json:"end_date,omitempty" jsonschema:"Contract end date (YYYY-MM-DD, optional)"`
-		PaymentTerms   string   `json:"payment_terms,omitempty" jsonschema:"Payment terms (e.g. 'Net 30')"`
-		Notes          string   `json:"notes,omitempty" jsonschema:"Additional notes"`
+		ClientName     string  `json:"client_name" jsonschema:"Client name"`
+		ContractNumber string  `json:"contract_number" jsonschema:"Contract number (unique identifier)"`
+		Name           string  `json:"name" jsonschema:"Contract name/description"`
+		HourlyRate     float64 `json:"hourly_rate" jsonschema:"Hourly rate for this contract"`
+		Currency       string  `json:"currency,omitempty" jsonschema:"Currency code (e.g. USD, EUR)"`
+		ContractType   string  `json:"contract_type,omitempty" jsonschema:"Contract type (hourly, fixed, retainer)"`
+		StartDate      string  `json:"start_date" jsonschema:"Contract start date (YYYY-MM-DD)"`
+		EndDate        string  `json:"end_date,omitempty" jsonschema:"Contract end date (YYYY-MM-DD, optional)"`
+		PaymentTerms   string  `json:"payment_terms,omitempty" jsonschema:"Payment terms (e.g. 'Net 30')"`
+		Notes          string  `json:"notes,omitempty" jsonschema:"Additional notes"`
 	}
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -235,7 +235,12 @@ func RegisterTools(server *mcp.Server, db *sql.DB) {
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 			RETURNING id
 		`, clientID, args.ContractNumber, args.Name, args.HourlyRate, args.Currency, args.ContractType, startDate.Format("2006-01-02"),
-		   func() interface{} { if endDate != nil { return endDate.Format("2006-01-02") }; return nil }(), args.PaymentTerms, args.Notes).Scan(&contractID)
+			func() interface{} {
+				if endDate != nil {
+					return endDate.Format("2006-01-02")
+				}
+				return nil
+			}(), args.PaymentTerms, args.Notes).Scan(&contractID)
 
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to add contract: %w", err)
@@ -493,13 +498,13 @@ func RegisterTools(server *mcp.Server, db *sql.DB) {
 
 	// Set Payment Details tool
 	type setPaymentDetailsArgs struct {
-		ClientName     string `json:"client_name" jsonschema:"Client name"`
-		BankName       string `json:"bank_name,omitempty" jsonschema:"Bank name"`
-		AccountNumber  string `json:"account_number,omitempty" jsonschema:"Account number"`
-		RoutingNumber  string `json:"routing_number,omitempty" jsonschema:"Routing number"`
-		SwiftCode      string `json:"swift_code,omitempty" jsonschema:"SWIFT/BIC code"`
-		PaymentTerms   string `json:"payment_terms,omitempty" jsonschema:"Payment terms (e.g. Net 30)"`
-		Notes          string `json:"notes,omitempty" jsonschema:"Additional payment notes"`
+		ClientName    string `json:"client_name" jsonschema:"Client name"`
+		BankName      string `json:"bank_name,omitempty" jsonschema:"Bank name"`
+		AccountNumber string `json:"account_number,omitempty" jsonschema:"Account number"`
+		RoutingNumber string `json:"routing_number,omitempty" jsonschema:"Routing number"`
+		SwiftCode     string `json:"swift_code,omitempty" jsonschema:"SWIFT/BIC code"`
+		PaymentTerms  string `json:"payment_terms,omitempty" jsonschema:"Payment terms (e.g. Net 30)"`
+		Notes         string `json:"notes,omitempty" jsonschema:"Additional payment notes"`
 	}
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -884,18 +889,18 @@ func RegisterTools(server *mcp.Server, db *sql.DB) {
 		}
 
 		return &mcp.CallToolResult{
-			Content: []mcp.Content{
-				&mcp.TextContent{
-					Text: fmt.Sprintf("Invoice %s created successfully\nTotal: $%.2f (%.2f hours)\nPDF saved to: %s",
-						invoiceNumber, totalAmount, totalHours, pdfPath),
+				Content: []mcp.Content{
+					&mcp.TextContent{
+						Text: fmt.Sprintf("Invoice %s created successfully\nTotal: $%.2f (%.2f hours)\nPDF saved to: %s",
+							invoiceNumber, totalAmount, totalHours, pdfPath),
+					},
 				},
-			},
-		}, map[string]interface{}{
-			"invoice_number": invoiceNumber,
-			"total_amount":   totalAmount,
-			"total_hours":    totalHours,
-			"pdf_path":       pdfPath,
-		}, nil
+			}, map[string]interface{}{
+				"invoice_number": invoiceNumber,
+				"total_amount":   totalAmount,
+				"total_hours":    totalHours,
+				"pdf_path":       pdfPath,
+			}, nil
 	})
 
 	// Delete Time Entry tool
@@ -1004,13 +1009,13 @@ func RegisterTools(server *mcp.Server, db *sql.DB) {
 		}
 
 		return &mcp.CallToolResult{
-			Content: []mcp.Content{
-				&mcp.TextContent{Text: text},
-			},
-		}, map[string]interface{}{
-			"deleted_count": deletedCount,
-			"deleted_entries": deletedEntries,
-		}, nil
+				Content: []mcp.Content{
+					&mcp.TextContent{Text: text},
+				},
+			}, map[string]interface{}{
+				"deleted_count":   deletedCount,
+				"deleted_entries": deletedEntries,
+			}, nil
 	})
 
 	// Bulk Add Hours tool
@@ -1093,14 +1098,14 @@ func RegisterTools(server *mcp.Server, db *sql.DB) {
 		}
 
 		return &mcp.CallToolResult{
-			Content: []mcp.Content{
-				&mcp.TextContent{Text: text},
-			},
-		}, map[string]interface{}{
-			"added_count": addedCount,
-			"total_hours": totalHours,
-			"added_entries": addedEntries,
-		}, nil
+				Content: []mcp.Content{
+					&mcp.TextContent{Text: text},
+				},
+			}, map[string]interface{}{
+				"added_count":   addedCount,
+				"total_hours":   totalHours,
+				"added_entries": addedEntries,
+			}, nil
 	})
 
 	// Helper: Get Time Entry Details tool
@@ -1147,22 +1152,22 @@ func RegisterTools(server *mcp.Server, db *sql.DB) {
 		text += fmt.Sprintf("Created: %s\n", entry.CreatedAt.Format("2006-01-02 15:04:05"))
 
 		return &mcp.CallToolResult{
-			Content: []mcp.Content{
-				&mcp.TextContent{Text: text},
-			},
-		}, map[string]interface{}{
-			"entry": entry,
-			"client_name": clientName,
-			"invoice_status": invoiceStatus,
-		}, nil
+				Content: []mcp.Content{
+					&mcp.TextContent{Text: text},
+				},
+			}, map[string]interface{}{
+				"entry":          entry,
+				"client_name":    clientName,
+				"invoice_status": invoiceStatus,
+			}, nil
 	})
 
 	// Helper: Update Time Entry tool
 	type updateTimeEntryArgs struct {
-		EntryID     string  `json:"entry_id" jsonschema:"Time entry UUID to update"`
+		EntryID     string   `json:"entry_id" jsonschema:"Time entry UUID to update"`
 		Hours       *float64 `json:"hours,omitempty" jsonschema:"New hours value in 15-minute increments: 0.25, 0.5, 0.75, 1.0, etc. (optional)"`
-		Date        string  `json:"date,omitempty" jsonschema:"New date (optional, YYYY-MM-DD or natural language)"`
-		Description *string `json:"description,omitempty" jsonschema:"New description (optional)"`
+		Date        string   `json:"date,omitempty" jsonschema:"New date (optional, YYYY-MM-DD or natural language)"`
+		Description *string  `json:"description,omitempty" jsonschema:"New description (optional)"`
 	}
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -1237,14 +1242,14 @@ func RegisterTools(server *mcp.Server, db *sql.DB) {
 
 	// Helper: Search Time Entries tool
 	type searchTimeEntriesArgs struct {
-		ClientName  string `json:"client_name,omitempty" jsonschema:"Client name to filter by (optional)"`
-		Description string `json:"description,omitempty" jsonschema:"Search description text (optional)"`
-		ContractRef string `json:"contract_ref,omitempty" jsonschema:"Contract reference to filter by (optional)"`
+		ClientName  string   `json:"client_name,omitempty" jsonschema:"Client name to filter by (optional)"`
+		Description string   `json:"description,omitempty" jsonschema:"Search description text (optional)"`
+		ContractRef string   `json:"contract_ref,omitempty" jsonschema:"Contract reference to filter by (optional)"`
 		MinHours    *float64 `json:"min_hours,omitempty" jsonschema:"Minimum hours (optional)"`
 		MaxHours    *float64 `json:"max_hours,omitempty" jsonschema:"Maximum hours (optional)"`
-		StartDate   string `json:"start_date,omitempty" jsonschema:"Start date (optional)"`
-		EndDate     string `json:"end_date,omitempty" jsonschema:"End date (optional)"`
-		Invoiced    *bool  `json:"invoiced,omitempty" jsonschema:"Filter by invoice status: true=invoiced, false=not invoiced, null=all (optional)"`
+		StartDate   string   `json:"start_date,omitempty" jsonschema:"Start date (optional)"`
+		EndDate     string   `json:"end_date,omitempty" jsonschema:"End date (optional)"`
+		Invoiced    *bool    `json:"invoiced,omitempty" jsonschema:"Filter by invoice status: true=invoiced, false=not invoiced, null=all (optional)"`
 	}
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -1364,14 +1369,14 @@ func RegisterTools(server *mcp.Server, db *sql.DB) {
 		}
 
 		return &mcp.CallToolResult{
-			Content: []mcp.Content{
-				&mcp.TextContent{Text: text},
-			},
-		}, map[string]interface{}{
-			"entries": entries,
-			"total_hours": totalHours,
-			"count": len(entries),
-		}, nil
+				Content: []mcp.Content{
+					&mcp.TextContent{Text: text},
+				},
+			}, map[string]interface{}{
+				"entries":     entries,
+				"total_hours": totalHours,
+				"count":       len(entries),
+			}, nil
 	})
 
 	// Mark Time Entries as Invoiced tool
@@ -1455,14 +1460,14 @@ func RegisterTools(server *mcp.Server, db *sql.DB) {
 		}
 
 		return &mcp.CallToolResult{
-			Content: []mcp.Content{
-				&mcp.TextContent{Text: text},
-			},
-		}, map[string]interface{}{
-			"marked_count": markedCount,
-			"invoice_number": args.InvoiceNumber,
-			"marked_entries": markedEntries,
-		}, nil
+				Content: []mcp.Content{
+					&mcp.TextContent{Text: text},
+				},
+			}, map[string]interface{}{
+				"marked_count":   markedCount,
+				"invoice_number": args.InvoiceNumber,
+				"marked_entries": markedEntries,
+			}, nil
 	})
 
 	// Unmark Time Entries from Invoice tool
@@ -1536,13 +1541,13 @@ func RegisterTools(server *mcp.Server, db *sql.DB) {
 		}
 
 		return &mcp.CallToolResult{
-			Content: []mcp.Content{
-				&mcp.TextContent{Text: text},
-			},
-		}, map[string]interface{}{
-			"unmarked_count": unmarkedCount,
-			"unmarked_entries": unmarkedEntries,
-		}, nil
+				Content: []mcp.Content{
+					&mcp.TextContent{Text: text},
+				},
+			}, map[string]interface{}{
+				"unmarked_count":   unmarkedCount,
+				"unmarked_entries": unmarkedEntries,
+			}, nil
 	})
 
 	// List Invoice Details tool
@@ -1611,15 +1616,15 @@ func RegisterTools(server *mcp.Server, db *sql.DB) {
 		}
 
 		return &mcp.CallToolResult{
-			Content: []mcp.Content{
-				&mcp.TextContent{Text: text},
-			},
-		}, map[string]interface{}{
-			"invoice": invoice,
-			"client_name": clientName,
-			"time_entries": entries,
-			"total_hours": totalHours,
-		}, nil
+				Content: []mcp.Content{
+					&mcp.TextContent{Text: text},
+				},
+			}, map[string]interface{}{
+				"invoice":      invoice,
+				"client_name":  clientName,
+				"time_entries": entries,
+				"total_hours":  totalHours,
+			}, nil
 	})
 
 	// Set Business Info tool
@@ -1762,10 +1767,10 @@ func RegisterTools(server *mcp.Server, db *sql.DB) {
 		Description: "Update the status of an invoice",
 	}, func(ctx context.Context, req *mcp.CallToolRequest, args updateInvoiceStatusArgs) (*mcp.CallToolResult, any, error) {
 		validStatuses := map[string]bool{
-			"draft":    true,
-			"sent":     true,
-			"paid":     true,
-			"overdue":  true,
+			"draft":     true,
+			"sent":      true,
+			"paid":      true,
+			"overdue":   true,
 			"cancelled": true,
 		}
 
@@ -1886,14 +1891,14 @@ func RegisterTools(server *mcp.Server, db *sql.DB) {
 		}
 
 		return &mcp.CallToolResult{
-			Content: []mcp.Content{
-				&mcp.TextContent{Text: text},
-			},
-		}, map[string]interface{}{
-			"invoices": invoices,
-			"total_amount": totalAmount,
-			"count": len(invoices),
-		}, nil
+				Content: []mcp.Content{
+					&mcp.TextContent{Text: text},
+				},
+			}, map[string]interface{}{
+				"invoices":     invoices,
+				"total_amount": totalAmount,
+				"count":        len(invoices),
+			}, nil
 	})
 }
 

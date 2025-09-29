@@ -5,8 +5,8 @@ import (
 
 	"github.com/austin/hours-mcp/internal/models"
 	"github.com/johnfercher/maroto/v2"
-	"github.com/johnfercher/maroto/v2/pkg/components/text"
 	"github.com/johnfercher/maroto/v2/pkg/components/col"
+	"github.com/johnfercher/maroto/v2/pkg/components/text"
 	"github.com/johnfercher/maroto/v2/pkg/config"
 	"github.com/johnfercher/maroto/v2/pkg/consts/align"
 	"github.com/johnfercher/maroto/v2/pkg/consts/fontstyle"
@@ -91,7 +91,7 @@ func (g *InvoiceGenerator) Generate(invoice models.Invoice, payment models.Payme
 			),
 			col.New(4).Add(
 				text.New(fmt.Sprintf("Due Date: %s", invoice.DueDate.Format("January 2, 2006")), props.Text{
-					Size: 9,
+					Size:  9,
 					Align: align.Right,
 				}),
 			),
@@ -101,7 +101,7 @@ func (g *InvoiceGenerator) Generate(invoice models.Invoice, payment models.Payme
 			col.New(8),
 			col.New(4).Add(
 				text.New(fmt.Sprintf("Due Date: %s", invoice.DueDate.Format("January 2, 2006")), props.Text{
-					Size: 9,
+					Size:  9,
 					Align: align.Right,
 				}),
 			),

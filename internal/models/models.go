@@ -17,20 +17,20 @@ type Client struct {
 }
 
 type Contract struct {
-	ID             int       `json:"id"`
-	ClientID       int       `json:"client_id"`
-	ContractNumber string    `json:"contract_number"`
-	Name           string    `json:"name"`
-	HourlyRate     float64   `json:"hourly_rate"`
-	Currency       string    `json:"currency"`
-	ContractType   string    `json:"contract_type"`
-	StartDate      time.Time `json:"start_date"`
+	ID             int        `json:"id"`
+	ClientID       int        `json:"client_id"`
+	ContractNumber string     `json:"contract_number"`
+	Name           string     `json:"name"`
+	HourlyRate     float64    `json:"hourly_rate"`
+	Currency       string     `json:"currency"`
+	ContractType   string     `json:"contract_type"`
+	StartDate      time.Time  `json:"start_date"`
 	EndDate        *time.Time `json:"end_date,omitempty"`
-	Status         string    `json:"status"`
-	PaymentTerms   string    `json:"payment_terms,omitempty"`
-	Notes          string    `json:"notes,omitempty"`
-	CreatedAt      time.Time `json:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at"`
+	Status         string     `json:"status"`
+	PaymentTerms   string     `json:"payment_terms,omitempty"`
+	Notes          string     `json:"notes,omitempty"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
 
 	Client *Client `json:"client,omitempty"`
 }
@@ -81,9 +81,9 @@ type Invoice struct {
 	PDFPath       string    `json:"pdf_path,omitempty"`
 	CreatedAt     time.Time `json:"created_at"`
 
-	Client      *Client      `json:"client,omitempty"`
-	TimeEntries []TimeEntry  `json:"time_entries,omitempty"`
-	Contracts   []Contract   `json:"contracts,omitempty"`
+	Client      *Client     `json:"client,omitempty"`
+	TimeEntries []TimeEntry `json:"time_entries,omitempty"`
+	Contracts   []Contract  `json:"contracts,omitempty"`
 }
 
 type BusinessInfo struct {
