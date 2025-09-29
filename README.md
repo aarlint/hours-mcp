@@ -1,8 +1,56 @@
-# Hours MCP - Time Tracking & Invoicing for Claude Desktop
+# Hours MCP - Professional Time Tracking & Invoice Generation
 
-A Go-based MCP (Model Context Protocol) server for Apple Silicon that enables comprehensive time tracking and professional invoice generation directly through Claude Desktop.
+A comprehensive MCP (Model Context Protocol) server that enables contract-based time tracking and professional PDF invoice generation directly through Claude Desktop.
 
-## Features
+## 🚀 Quick Start
+
+### 📦 Download & Install
+
+1. **Download the binary** for your platform from [Latest Release](https://github.com/aarlint/hours-mcp/releases/latest):
+
+   | Platform | Download |
+   |----------|----------|
+   | **macOS (Apple Silicon)** | `hours-mcp-darwin-arm64` |
+   | **macOS (Intel)** | `hours-mcp-darwin-amd64` |
+   | **Linux (x64)** | `hours-mcp-linux-amd64` |
+   | **Linux (ARM64)** | `hours-mcp-linux-arm64` |
+   | **Windows (x64)** | `hours-mcp-windows-amd64.exe` |
+
+2. **Install the binary**:
+   ```bash
+   # Make executable and move to PATH
+   chmod +x hours-mcp-*
+   mv hours-mcp-* ~/.local/bin/hours-mcp
+   ```
+
+3. **Configure Claude Desktop**:
+
+   Open Claude Desktop → Settings → Developer → Edit Config, then add:
+   ```json
+   {
+     "mcpServers": {
+       "hours": {
+         "command": "/Users/YOUR_USERNAME/.local/bin/hours-mcp",
+         "args": [],
+         "env": {}
+       }
+     }
+   }
+   ```
+
+   Replace `YOUR_USERNAME` with your actual username.
+
+4. **Restart Claude Desktop** and start tracking time professionally! 🎯
+
+### 🎯 First Steps
+
+1. **Configure your business**: *"Set up my business information"*
+2. **Add a client**: *"Add client Acme Corp with address 123 Main St, San Francisco, CA"*
+3. **Create a contract**: *"Add contract AC-001 for Acme Corp at $150/hour"*
+4. **Track time**: *"Add 2 hours for contract AC-001 today - API development"*
+5. **Generate invoice**: *"Create invoice for Acme Corp for this month"*
+
+## ✨ Features
 
 - **Contract-Based Billing**: Professional contract management with individual rates and terms per client engagement
 - **Client Management**: Add, edit, and manage clients with complete address information
@@ -148,38 +196,48 @@ The system uses a professional contract-based billing model where:
 - Invoices are generated per contract, allowing separate billing for different engagements
 - Historical rate changes are preserved through contract versioning
 
-## Installation
+## 🛠️ Advanced Installation
 
-### Prerequisites
+### 📥 Pre-built Binaries (Recommended)
+
+See the [Quick Start](#-quick-start) section above for binary downloads.
+
+### 🔨 Build from Source
+
+For developers who want to build from source:
+
+#### Prerequisites
 - Go 1.21 or later
 - Claude Desktop app
-- macOS on Apple Silicon (M1/M2/M3)
+- Git
 
-### Build and Install
-
+#### Build Steps
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/hours-mcp
+git clone https://github.com/aarlint/hours-mcp.git
 cd hours-mcp
 
 # Download dependencies
-make deps
+go mod download
 
-# Build for Apple Silicon
+# Build for your platform
 make build
+
+# Or build for all platforms
+make build-all
 
 # Install to ~/.local/bin
 make install
 ```
 
-### Configure Claude Desktop
+### ⚙️ Claude Desktop Configuration Details
 
-Add the MCP server to your Claude Desktop configuration:
+#### Configuration File Location
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+- **Linux**: `~/.config/Claude/claude_desktop_config.json`
 
-1. Open Claude Desktop settings
-2. Go to Developer → Edit Config
-3. Add the following to the `mcpServers` section:
-
+#### Complete Configuration Example
 ```json
 {
   "mcpServers": {
@@ -192,7 +250,18 @@ Add the MCP server to your Claude Desktop configuration:
 }
 ```
 
-4. Restart Claude Desktop
+#### Troubleshooting Configuration
+- Replace `YOUR_USERNAME` with your actual system username
+- Ensure the binary path is correct: `which hours-mcp`
+- Verify binary is executable: `chmod +x ~/.local/bin/hours-mcp`
+- Check Claude Desktop logs if connection fails
+- Restart Claude Desktop after configuration changes
+
+#### Verification
+After restarting Claude Desktop, you should be able to use commands like:
+- *"List all clients"*
+- *"Set up my business information"*
+- *"Add client Test Corp"*
 
 ## Usage Examples
 
