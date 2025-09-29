@@ -36,6 +36,9 @@ claude_desktop_config.json
 # Build artifacts
 dist/
 build/
+hours-mcp-*
+*.tar.gz
+*.zip
 
 # Temporary files
 *.tmp

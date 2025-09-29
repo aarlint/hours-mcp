@@ -1,0 +1,185 @@
+name: Release Binaries
+
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release'
+        required: true
+        default: 'latest'
+
+env:
+  GO_VERSION: '1.21'
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+            name: hours-mcp-darwin-amd64
+          - os: macos-latest
+            goos: darwin
+            goarch: arm64
+            name: hours-mcp-darwin-arm64
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            name: hours-mcp-linux-amd64
+          - os: ubuntu-latest
+            goos: linux
+            goarch: arm64
+            name: hours-mcp-linux-arm64
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+            name: hours-mcp-windows-amd64.exe
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{ env.GO_VERSION }}
+
+    - name: Install dependencies (Linux ARM64)
+      if: matrix.goos == 'linux' && matrix.goarch == 'arm64'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-aarch64-linux-gnu
+
+    - name: Install dependencies (Windows)
+      if: matrix.goos == 'windows'
+      run: |
+        # Windows builds will use CGO with the default gcc
+
+    - name: Build binary
+      env:
+        GOOS: ${{ matrix.goos }}
+        GOARCH: ${{ matrix.goarch }}
+        CGO_ENABLED: 1
+        CC: ${{ matrix.goos == 'linux' && matrix.goarch == 'arm64' && 'aarch64-linux-gnu-gcc' || '' }}
+      run: |
+        go mod download
+        go build -ldflags="-s -w -X main.version=${{ github.ref_name }}" -o ${{ matrix.name }} .
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: binaries
+        path: ${{ matrix.name }}
+
+  create-release:
+    name: Create Release
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: binaries
+        path: ./binaries
+
+    - name: Create checksums
+      run: |
+        cd binaries
+        sha256sum * > checksums.txt
+        cat checksums.txt
+
+    - name: Get tag name
+      id: tag
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+        else
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create release notes
+      run: |
+        cat > release_notes.md << 'EOF'
+        ## Hours MCP - Professional Time Tracking & Invoice Generation
+
+        ### 🚀 Quick Start
+
+        1. **Download** the binary for your platform below
+        2. **Install**: `chmod +x hours-mcp-* && mv hours-mcp-* ~/.local/bin/hours-mcp`
+        3. **Configure** Claude Desktop (see [README](https://github.com/aarlint/hours-mcp#configure-claude-desktop))
+
+        ### 📦 Platform Downloads
+
+        | Platform | Architecture | Download |
+        |----------|-------------|----------|
+        | **macOS** | Apple Silicon (M1/M2/M3) | `hours-mcp-darwin-arm64` |
+        | **macOS** | Intel | `hours-mcp-darwin-amd64` |
+        | **Linux** | x86_64 | `hours-mcp-linux-amd64` |
+        | **Linux** | ARM64 | `hours-mcp-linux-arm64` |
+        | **Windows** | x86_64 | `hours-mcp-windows-amd64.exe` |
+
+        ### ✨ Features
+
+        - 🎯 **Contract-based billing** with individual rates per engagement
+        - 📄 **Professional PDF invoices** with business branding
+        - 👥 **Complete recipient management** (add, list, remove)
+        - ⏱️ **15-minute precision** time tracking with UUID entries
+        - 🗣️ **Natural language** time entry support
+        - 🏗️ **Professional database** with automatic migrations
+        - 💼 **Business information** configuration for invoices
+        - 🔒 **Local SQLite storage** - your data stays private
+
+        ### 🔐 Security
+
+        All binaries are built automatically by GitHub Actions and include checksums for verification.
+
+        ### 📚 Documentation
+
+        - [README](https://github.com/aarlint/hours-mcp/blob/main/README.md) - Complete setup and usage guide
+        - [Database Schema](https://github.com/aarlint/hours-mcp/blob/main/README.md#database-schema) - Entity relationships
+        - [Usage Examples](https://github.com/aarlint/hours-mcp/blob/main/README.md#usage-examples) - Common workflows
+
+        ### 🛠️ Claude Desktop Configuration
+
+        Add to your Claude Desktop config:
+
+        ```json
+        {
+          "mcpServers": {
+            "hours": {
+              "command": "/Users/YOUR_USERNAME/.local/bin/hours-mcp",
+              "args": [],
+              "env": {}
+            }
+          }
+        }
+        ```
+
+        Then restart Claude Desktop and start tracking time professionally! 🚀
+        EOF
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.tag.outputs.tag }}
+        name: "Hours MCP ${{ steps.tag.outputs.tag }}"
+        body_path: release_notes.md
+        files: |
+          binaries/*
+        draft: false
+        prerelease: ${{ contains(steps.tag.outputs.tag, 'beta') || contains(steps.tag.outputs.tag, 'alpha') || steps.tag.outputs.tag == 'latest' }}
+        make_latest: ${{ !contains(steps.tag.outputs.tag, 'beta') && !contains(steps.tag.outputs.tag, 'alpha') && steps.tag.outputs.tag != 'latest' }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

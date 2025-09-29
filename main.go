@@ -10,7 +10,16 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
+// version is set by build-time ldflags
+var version = "dev"
+
 func main() {
+	// Handle version flag
+	if len(os.Args) > 1 && (os.Args[1] == "--version" || os.Args[1] == "-v") {
+		fmt.Printf("hours-mcp version %s\n", version)
+		os.Exit(0)
+	}
+
 	// Initialize database
 	db, err := database.Initialize()
 	if err != nil {
@@ -22,7 +31,7 @@ func main() {
 	// Create MCP server
 	mcpServer := mcp.NewServer(&mcp.Implementation{
 		Name:    "hours-mcp",
-		Version: "1.0.0",
+		Version: version,
 	}, nil)
 
 	// Register tools with the server
