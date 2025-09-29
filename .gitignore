@@ -1,0 +1,42 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+hours-mcp
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Database files (contains personal data)
+*.db
+.hours/
+
+# Local config files
+claude_desktop_config.json
+.claude/settings.local.json
+
+# Build artifacts
+dist/
+build/
+
+# Temporary files
+*.tmp
+*.temp
