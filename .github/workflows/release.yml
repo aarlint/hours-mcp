@@ -4,14 +4,12 @@ on:
   push:
     tags: [ 'v*' ]
   workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Tag to release'
-        required: true
-        default: 'latest'
 
 env:
   GO_VERSION: '1.21'
+
+permissions:
+  contents: write
 
 jobs:
   build-and-release:
@@ -82,7 +80,7 @@ jobs:
     name: Create Release
     needs: build-and-release
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
     - name: Checkout code
@@ -103,12 +101,7 @@ jobs:
 
     - name: Get tag name
       id: tag
-      run: |
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
-        else
-          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-        fi
+      run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
     - name: Create release notes
       run: |
@@ -180,7 +173,6 @@ jobs:
         files: |
           binaries/*
         draft: false
-        prerelease: ${{ contains(steps.tag.outputs.tag, 'beta') || contains(steps.tag.outputs.tag, 'alpha') || steps.tag.outputs.tag == 'latest' }}
-        make_latest: ${{ !contains(steps.tag.outputs.tag, 'beta') && !contains(steps.tag.outputs.tag, 'alpha') && steps.tag.outputs.tag != 'latest' }}
+        prerelease: ${{ contains(steps.tag.outputs.tag, 'beta') || contains(steps.tag.outputs.tag, 'alpha') }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
